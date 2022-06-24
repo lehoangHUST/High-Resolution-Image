@@ -21,11 +21,10 @@ def run(args):
 
     model = SRCNN(in_channels=3).to(device)
     criterion = nn.MSELoss()
-    optimizer = optim.Adam([
-        {'params': model.conv1.parameters()},
-        {'params': model.conv2.parameters()},
-        {'params': model.conv3.parameters(), 'lr': args.lr * 0.1}
-    ], lr=args.lr)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, momentum=0.9)
+
+    if args.pretrained is not None:
+        model.load_state_dict(torch.load(args.pretrained))
 
     train_dataset = SRDataset(path=args.path, task='train')
     train_dataloader = DataLoader(dataset=train_dataset,
@@ -65,7 +64,7 @@ def run(args):
                 t.set_postfix(loss='{:.6f}'.format(epoch_losses.avg))
                 t.update(len(inputs))
 
-        #torch.save(model.state_dict(), os.path.join(args.outputs_dir, 'epoch_{}.pth'.format(epoch)))
+        torch.save(model.state_dict(), os.path.join(args.outputs_dir, 'epoch_{}.pth'.format(epoch)))
 
         model.eval()
         epoch_psnr = AverageMeter()
@@ -90,13 +89,14 @@ def run(args):
             best_weights = copy.deepcopy(model.state_dict())
 
     print('best epoch: {}, psnr: {:.2f}'.format(best_epoch, best_psnr))
-    #torch.save(best_weights, os.path.join(args.outputs_dir, 'best.pth'))
+    torch.save(best_weights, os.path.join(args.outputs_dir, 'best.pth'))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', type=str, default=None)
     parser.add_argument('--save_weights', type=str, default=None)
+    parser.add_argument('--pretrained', type=str, default=None)
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--batch-size', type=int, default=16)
     parser.add_argument('--num-epochs', type=int, default=100)
