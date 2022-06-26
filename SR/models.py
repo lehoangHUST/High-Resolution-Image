@@ -1,5 +1,7 @@
 from torch import nn
 from torchinfo import summary
+from math import sqrt
+import torch
 import torchvision.models as models
 
 
@@ -38,13 +40,25 @@ class FastSRCNN(nn.Module):
         # Activation
         self.prelu = nn.PReLU()
 
-    def forward(self, x):
+    def forward(self, x) -> torch.Tensor:
         x = self.prelu(self.conv1(x))
         x = self.prelu(self.conv2(x))
         for i in range(4):
             x = self.prelu(self.conv3(x))
         x = self.prelu(self.conv4(x))
         x = self.deconv(x)
+        return x
+
+    # The filter weight of each layer is a Gaussian distribution with zero mean and standard deviation initialized by
+    # random extraction 0.001 (deviation is 0).
+    def _initialize_weights(self) -> None:
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.normal_(m.weight.data, mean=0.0, std=sqrt(2 / (m.out_channels * m.weight.data[0][0].numel())))
+                nn.init.zeros_(m.bias.data)
+
+        nn.init.normal_(self.deconv.weight.data, mean=0.0, std=0.001)
+        nn.init.zeros_(self.deconv.bias.data)
 
 
 if __name__ == '__main__':
