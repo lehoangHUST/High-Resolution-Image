@@ -10,7 +10,7 @@ from torch.utils.data.dataloader import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
 
-from models.SRCNN import SRCNN
+from SR.models import SRCNN
 from datasets.data import SRDataset
 from utils.loss import AverageMeter, calc_psnr
 

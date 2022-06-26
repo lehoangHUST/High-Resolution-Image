@@ -43,7 +43,7 @@ class SRDataset(Dataset):
         # Convert
         imgHR, imgLR = imgHR[:, :, ::-1], imgLR[:, :, ::-1]
         imgHR, imgLR = imgHR.transpose(2, 0, 1), imgLR.transpose(2, 0, 1)  # (C,H,W)
-        imgHR, imgLR = np.ascontiguousarray(imgHR), np.ascontiguousarray(imgLR)
+        imgHR, imgLR = np.ascontiguousarray(imgHR) / 255, np.ascontiguousarray(imgLR) / 255
         sample = {'LR_imagename': imgname_LR,
                   'HR_imagename': imgname_HR,
                   'LR_img': torch.from_numpy(imgLR),
