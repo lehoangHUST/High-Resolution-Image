@@ -17,7 +17,7 @@ from utils.loss import AverageMeter, calc_psnr
 def run(args):
     cudnn.benchmark = True
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
+    # Create config
     model = SRCNN(in_channels=3).to(device)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr, momentum=0.9)
@@ -33,7 +33,8 @@ def run(args):
                                   pin_memory=True,
                                   drop_last=True)
     test_dataset = SRDataset(path=args.path, task='test')
-    test_dataloader = DataLoader(dataset=test_dataset, batch_size=1)
+    test_dataloader = DataLoader(dataset=test_dataset,
+                                 batch_size=1)
 
     best_weights = copy.deepcopy(model.state_dict())
     best_epoch = 0
