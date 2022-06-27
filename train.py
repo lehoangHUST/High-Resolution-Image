@@ -7,11 +7,10 @@ from torch import nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
 from torch.utils.data.dataloader import DataLoader
-from torchvision import transforms
 from tqdm import tqdm
 
 from SR.models import SRCNN
-from datasets.data import SRDataset
+from utils.data import SRDataset
 from utils.loss import AverageMeter, calc_psnr
 
 
