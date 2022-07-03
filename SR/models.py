@@ -6,7 +6,7 @@ import torchvision.models as models
 
 
 # Implementation  of Image Super-Resolution Using Deep Convolutional Networks (ECCV 2014)
-# arxiv.org/abs/1501.00092
+# https://arxiv.org/abs/1501.00092.pdf
 class SRCNN(nn.Module):
     def __init__(self, in_channels):
         super(SRCNN, self).__init__()
@@ -39,6 +39,7 @@ class FastSRCNN(nn.Module):
 
         # Activation
         self.prelu = nn.PReLU()
+        self._initialize_weights()
 
     def forward(self, x) -> torch.Tensor:
         x = self.prelu(self.conv1(x))
@@ -61,6 +62,44 @@ class FastSRCNN(nn.Module):
         nn.init.zeros_(self.deconv.bias.data)
 
 
+# Implementation of Image Super-Resolution Using Deep Convolutional Network use ESPCN
+# https://arxiv.org/pdf/1609.05158.pdf
+class ESPCN(nn.Module):
+    def __init__(self, in_channels, upscale_factor):
+        super(ESPCN, self).__init__()
+        # Feature mapping
+        self.feture_map = nn.Sequential(
+            nn.Conv2d(in_channels, 64, kernel_size=5, padding=2),
+            nn.Tanh(),
+            nn.Conv2d(64, 32, kernel_size=3, padding=1),
+            nn.Tanh()
+        )
+        # Sub-pixel
+        self.sub_pixel = nn.Sequential(
+            nn.Conv2d(32, in_channels * (upscale_factor ** 2), kernel_size=3, padding=1),
+            nn.PixelShuffle(upscale_factor)
+        )
+        self._initialize_weights()
+
+    def forward(self, x) -> torch.Tensor:
+        x = self.feture_map(x)
+        x = self.sub_pixel(x)
+        return x
+
+    # The filter weight of each layer is a Gaussian distribution with zero mean and standard deviation initialized by
+    # random extraction 0.001 (deviation is 0).
+    def _initialize_weights(self):
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                if module.in_channels == 32:
+                    nn.init.normal_(module.weight.data, 0.0, 0.001)
+                    nn.init.zeros_(module.bias.data)
+                else:
+                    nn.init.normal_(module.weight.data, 0.0,
+                                    sqrt(2 / (module.out_channels * module.weight.data[0][0].numel())))
+                    nn.init.zeros_(module.bias.data)
+
+
 if __name__ == '__main__':
-    model = FastSRCNN(in_channels=3, upscale_factor=4)
+    model = ESPCN(in_channels=3, upscale_factor=4)
     summary(model, input_size=(3, 94, 94))

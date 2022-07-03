@@ -9,7 +9,7 @@ import torch.backends.cudnn as cudnn
 from torch.utils.data.dataloader import DataLoader
 from tqdm import tqdm
 
-from SR.models import SRCNN
+from SR.models import *
 from utils.data import SRDataset
 from utils.loss import AverageMeter, calc_psnr
 
@@ -18,7 +18,7 @@ def run(args):
     cudnn.benchmark = True
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     # Create config
-    model = SRCNN(in_channels=3).to(device)
+    model = ESPCN(in_channels=3).to(device)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=args.lr, momentum=0.9)
 
