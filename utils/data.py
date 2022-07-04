@@ -48,7 +48,7 @@ class SRDataset(Dataset):
                   'HR_imagename': imgname_HR,
                   'LR_img': torch.from_numpy(imgLR),
                   'HR_img': torch.from_numpy(imgHR)}
-        sample["LR_img"] = transforms.Resize((384, 384))(sample["LR_img"])
+        #sample["LR_img"] = transforms.Resize((384, 384))(sample["LR_img"])
         return sample
 
     def __len__(self):

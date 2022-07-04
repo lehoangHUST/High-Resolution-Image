@@ -18,9 +18,9 @@ def run(args):
     cudnn.benchmark = True
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     # Create config
-    model = ESPCN(in_channels=3).to(device)
+    model = ESPCN(in_channels=3, upscale_factor=4).to(device)
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=args.lr, momentum=0.9)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     if args.pretrained is not None:
         model.load_state_dict(torch.load(args.pretrained))
@@ -95,7 +95,7 @@ def run(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', type=str, default=None)
-    parser.add_argument('--save_weights', type=str, default=None)
+    parser.add_argument('--outputs_dir', type=str, default=None)
     parser.add_argument('--pretrained', type=str, default=None)
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--batch-size', type=int, default=16)

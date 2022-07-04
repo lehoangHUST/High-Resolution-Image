@@ -102,4 +102,4 @@ class ESPCN(nn.Module):
 
 if __name__ == '__main__':
     model = ESPCN(in_channels=3, upscale_factor=4)
-    summary(model, input_size=(3, 94, 94))
+    summary(model, input_size=(16, 3, 96, 96))
